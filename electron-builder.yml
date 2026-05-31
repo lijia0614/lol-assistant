@@ -1,0 +1,17 @@
+appId: com.lol-assistant.app
+productName: LOL Assistant
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+mac:
+  target: dmg
+  artifactName: "${name}-${version}-mac.${ext}"
+  category: public.app-category.utilities
+win:
+  target: nsis
+  artifactName: "${name}-${version}-win.${ext}"
+linux:
+  target: AppImage
+  artifactName: "${name}-${version}-linux.${ext}"

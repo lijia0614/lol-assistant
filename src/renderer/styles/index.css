@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  background: #0a0c10;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  color: #e5e7eb;
+}
+
+#root {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 2rem;
+}
+
+/* ===== 覆盖层主面板 ===== */
+.overlay-panel {
+  background: rgba(10, 12, 16, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  box-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ===== 玩家卡片 ===== */
+.player-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.player-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(255,255,255,0.02) 0%, transparent 70%);
+  pointer-events: none;
+}
+.player-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.player-card:active {
+  transform: translateY(0);
+  transition: all 0.05s ease;
+}
+
+/* 蓝方卡片左边框 */
+.player-card.team-blue {
+  border-left: 2px solid rgba(77, 166, 255, 0.6);
+}
+.player-card.team-blue:hover {
+  border-left-color: #4da6ff;
+  box-shadow: 0 8px 24px rgba(77, 166, 255, 0.08);
+}
+
+/* 红方卡片左边框 */
+.player-card.team-red {
+  border-left: 2px solid rgba(255, 77, 77, 0.5);
+}
+.player-card.team-red:hover {
+  border-left-color: #ff4d4d;
+  box-shadow: 0 8px 24px rgba(255, 77, 77, 0.08);
+}
+
+/* 高威胁标记 */
+.player-card.threat {
+  border-color: rgba(255, 77, 77, 0.2);
+  box-shadow: 0 0 16px rgba(255, 77, 77, 0.08);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+.player-card.threat::after {
+  content: '⚠';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 8px;
+  opacity: 0.7;
+}
+@keyframes threat-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 77, 77, 0.06); }
+  50% { box-shadow: 0 0 20px rgba(255, 77, 77, 0.12); }
+}
+
+/* ===== 加载骨架屏 ===== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: 4px;
+}
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== 段位颜色 ===== */
+.tier-iron    { color: #8B7D6B; }
+.tier-bronze  { color: #CD7F32; }
+.tier-silver  { color: #C0C0C0; }
+.tier-gold    { color: #FFD700; }
+.tier-platinum{ color: #08A88A; }
+.tier-emerald { color: #50C878; }
+.tier-diamond { color: #B9F2FF; }
+.tier-master  { color: #9B59B6; }
+.tier-grandmaster { color: #E74C3C; }
+.tier-challenger  { color: #F4C430; }
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ===== 设置开关按钮 ===== */
+.toggle-switch {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  transition: background-color 0.25s ease;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  outline: none;
+}
+.toggle-switch.on {
+  background: #4da6ff;
+}
+.toggle-switch.off {
+  background: rgba(255, 255, 255, 0.08);
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-switch.on::after {
+  transform: translateX(18px);
+}
+
+/* ===== 输入框 ===== */
+input[type="text"],
+input[type="password"] {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e5e7eb;
+  font-size: 13px;
+  transition: border-color 0.2s ease;
+  outline: none;
+}
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: rgba(77, 166, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.08);
+}
+input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== 范围滑块 ===== */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4da6ff;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(77, 166, 255, 0.3);
+}
