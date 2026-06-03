@@ -7,6 +7,7 @@ interface OverlayPanelProps {
   loading: boolean
   onPlayerClick?: (player: PlayerData) => void
   onSettingsClick?: () => void
+  onShowWelcome?: () => void
 }
 
 const PHASE_LABELS: Record<string, string> = {
@@ -20,18 +21,7 @@ const PHASE_LABELS: Record<string, string> = {
   EndOfGame: '游戏结束',
 }
 
-const PHASE_ICONS: Record<string, string> = {
-  None: '',
-  Lobby: '',
-  Matchmaking: '',
-  ReadyCheck: '',
-  ChampSelect: '',
-  GameStart: '',
-  InProgress: '',
-  EndOfGame: '',
-}
-
-export default function OverlayPanel({ session, loading, onPlayerClick, onSettingsClick }: OverlayPanelProps) {
+export default function OverlayPanel({ session, loading, onPlayerClick, onSettingsClick, onShowWelcome }: OverlayPanelProps) {
   // 加载中
   if (loading) return <LoadingSkeleton />
 
@@ -56,13 +46,21 @@ export default function OverlayPanel({ session, loading, onPlayerClick, onSettin
         <p className="text-xs text-gray-600 mt-2">等待 LOL 客户端连接...</p>
         <p className="text-2xs text-gray-700 mt-1">Ctrl+Tab 切换显示</p>
 
-        {/* 设置入口 */}
-        <button
-          onClick={onSettingsClick}
-          className="mt-4 text-2xs text-gray-600 hover:text-gray-400 bg-white/5 hover:bg-white/10 rounded-lg px-3 py-1.5 transition-colors"
-        >
-          ⚙ 设置
-        </button>
+        {/* 操作按钮 */}
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button
+            onClick={onShowWelcome}
+            className="text-2xs text-gray-600 hover:text-gray-400 bg-white/5 hover:bg-white/10 rounded-lg px-3 py-1.5 transition-colors"
+          >
+            新手指引
+          </button>
+          <button
+            onClick={onSettingsClick}
+            className="text-2xs text-gray-600 hover:text-gray-400 bg-white/5 hover:bg-white/10 rounded-lg px-3 py-1.5 transition-colors"
+          >
+            设置
+          </button>
+        </div>
       </div>
     )
   }
@@ -85,6 +83,8 @@ export default function OverlayPanel({ session, loading, onPlayerClick, onSettin
 
   return (
     <div className="overlay-panel w-full max-w-4xl mx-auto p-5">
+      {/* 拖拽手柄 */}
+      <div className="drag-handle h-5 -mt-2 mb-2 cursor-grab active:cursor-grabbing rounded-t-xl" />
       {/* 头部 — 游戏状态 */}
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">

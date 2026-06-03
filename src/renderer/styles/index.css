@@ -201,6 +201,16 @@ input::placeholder {
   color: rgba(255, 255, 255, 0.2);
 }
 
+/* ===== 窗口拖拽区域 ===== */
+.drag-region {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+}
+.drag-handle {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+}
+
 /* ===== 范围滑块 ===== */
 input[type="range"] {
   -webkit-appearance: none;

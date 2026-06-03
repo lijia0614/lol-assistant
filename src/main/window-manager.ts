@@ -52,7 +52,15 @@ export class WindowManager {
 
   /** 创建系统托盘 */
   createTray(): Tray {
-    const icon = nativeImage.createEmpty()
+    // 用应用图标作为托盘图标，回退到空白图标
+    let icon: Electron.NativeImage
+    try {
+      const iconPath = join(__dirname, '../../resources/icon.png')
+      icon = nativeImage.createFromPath(iconPath)
+      if (icon.isEmpty()) throw new Error('empty')
+    } catch {
+      icon = nativeImage.createEmpty()
+    }
     this.tray = new Tray(icon.resize({ width: 16, height: 16 }))
 
     const contextMenu = Menu.buildFromTemplate([
