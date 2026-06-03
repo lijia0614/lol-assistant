@@ -1,4 +1,70 @@
-import type { GameSession, PlayerData, AppSettings } from '../types'
+import type { GameSession, PlayerData, AppSettings, RecentMatch } from '../types'
+
+const championPool = [
+  { id: 157, name: '疾风剑豪' },
+  { id: 64, name: '盲僧' },
+  { id: 222, name: '暴走萝莉' },
+  { id: 103, name: '九尾妖狐' },
+  { id: 11, name: '无极剑圣' },
+  { id: 81, name: '探险家' },
+  { id: 86, name: '德玛西亚之力' },
+  { id: 55, name: '不祥之刃' },
+  { id: 22, name: '寒冰射手' },
+  { id: 67, name: '暗夜猎手' },
+  { id: 141, name: '影流之主' },
+  { id: 122, name: '诺克萨斯之手' },
+  { id: 114, name: '无双剑姬' },
+  { id: 236, name: '圣枪游侠' },
+  { id: 412, name: '魂锁典狱长' },
+  { id: 89, name: '曙光女神' },
+  { id: 350, name: '魔法猫咪' },
+  { id: 266, name: '暗裔剑魔' },
+  { id: 63, name: '复仇焰魂' },
+  { id: 37, name: '琴瑟仙女' },
+]
+
+const lanes = ['上单', '打野', '中单', 'ADC', '辅助']
+const laneMap: Record<number, string> = {
+  157: '中单', 64: '打野', 222: 'ADC', 103: '中单', 11: '打野',
+  81: 'ADC', 86: '上单', 55: '中单', 22: 'ADC', 67: 'ADC',
+  141: '中单', 122: '上单', 114: '上单', 236: 'ADC', 412: '辅助',
+  89: '辅助', 350: '辅助', 266: '上单', 63: '中单', 37: '辅助',
+}
+
+/** 为玩家生成最近 5 场对局记录 */
+function generateRecentMatches(playerName: string, winRate: number): RecentMatch[] {
+  const matches: RecentMatch[] = []
+  const now = Date.now()
+
+  for (let i = 0; i < 5; i++) {
+    const champ = championPool[Math.floor(Math.random() * championPool.length)]
+    const win = Math.random() < winRate
+    const kills = Math.floor(Math.random() * 15) + (win ? 2 : 0)
+    const deaths = Math.floor(Math.random() * 8) + 1
+    const assists = Math.floor(Math.random() * 15) + (win ? 3 : 0)
+    const duration = Math.floor(Math.random() * 1200) + 1500 // 25-45 min
+    const cs = Math.floor(Math.random() * 150) + 100 + (win ? 30 : 0)
+
+    matches.push({
+      matchId: `${playerName.slice(0, 4)}-match-${i}`,
+      timestamp: now - (i * 4 + Math.floor(Math.random() * 4)) * 3600_000, // 每 4-8h 一场
+      duration,
+      win,
+      championId: champ.id,
+      championName: champ.name,
+      kills,
+      deaths,
+      assists,
+      cs,
+      csPerMinute: Math.round((cs / (duration / 60)) * 10) / 10,
+      gameMode: Math.random() > 0.2 ? '排位赛' : '匹配赛',
+      lane: laneMap[champ.id] ?? lanes[Math.floor(Math.random() * lanes.length)],
+      kp: Math.floor(Math.random() * 40) + 30, // 30-70% 参团率
+    })
+  }
+
+  return matches
+}
 
 /** 生成一个玩家模拟数据 */
 function makePlayer(
@@ -6,28 +72,6 @@ function makePlayer(
 ): PlayerData {
   const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER']
   const divisions = ['I', 'II', 'III', 'IV']
-  const championPool = [
-    { id: 157, name: '疾风剑豪' },   // Yasuo
-    { id: 64, name: '盲僧' },        // Lee Sin
-    { id: 222, name: '暴走萝莉' },    // Jinx
-    { id: 103, name: '九尾妖狐' },    // Ahri
-    { id: 11, name: '无极剑圣' },     // Master Yi
-    { id: 81, name: '探险家' },       // Ezreal
-    { id: 86, name: '德玛西亚之力' },  // Garen
-    { id: 55, name: '不祥之刃' },     // Katarina
-    { id: 22, name: '寒冰射手' },     // Ashe
-    { id: 67, name: '暗夜猎手' },     // Vayne
-    { id: 141, name: '影流之主' },    // Zed
-    { id: 122, name: '诺克萨斯之手' }, // Darius
-    { id: 114, name: '无双剑姬' },    // Fiora
-    { id: 236, name: '圣枪游侠' },    // Lucian
-    { id: 412, name: '魂锁典狱长' },  // Thresh
-    { id: 89, name: '曙光女神' },     // Leona
-    { id: 350, name: '魔法猫咪' },    // Yuumi
-    { id: 266, name: '暗裔剑魔' },    // Aatrox
-    { id: 63, name: '复仇焰魂' },     // Brand
-    { id: 37, name: '琴瑟仙女' },     // Sona
-  ]
 
   const tierIdx = Math.floor(Math.random() * tiers.length)
   const tier = tiers[tierIdx]
@@ -38,6 +82,7 @@ function makePlayer(
   const deaths = Math.floor(Math.random() * 10) + 1
   const assists = Math.floor(Math.random() * 15) + 1
   const kda = deaths === 0 ? kills + assists : Math.round(((kills + assists) / deaths) * 10) / 10
+  const winRate = Math.round((wins / gamesPlayed) * 100) / 100
 
   const topChamps = [...championPool]
     .sort(() => Math.random() - 0.5)
@@ -52,16 +97,19 @@ function makePlayer(
     ? championPool.find(c => c.id === overrides.championId) ?? championPool[Math.floor(Math.random() * championPool.length)]
     : championPool[Math.floor(Math.random() * championPool.length)]
 
+  const name = overrides.summonerName ?? `玩家_${overrides.puuid.slice(0, 6)}`
+
   return {
     puuid: overrides.puuid,
-    summonerName: overrides.summonerName ?? `玩家_${overrides.puuid.slice(0, 6)}`,
+    summonerName: name,
     summonerId: overrides.summonerId ?? `summoner-${overrides.puuid.slice(0, 8)}`,
     team: overrides.team,
     championId: overrides.championId ?? champ.id,
     championName: overrides.championName ?? champ.name,
     rank: overrides.rank ?? { tier, division, lp: Math.floor(Math.random() * 100) },
-    recentStats: overrides.recentStats ?? { kda, winRate: Math.round((wins / gamesPlayed) * 100) / 100, gamesPlayed },
+    recentStats: overrides.recentStats ?? { kda, winRate, gamesPlayed },
     topChampions: overrides.topChampions ?? topChamps,
+    recentMatches: overrides.recentMatches ?? generateRecentMatches(name, winRate),
   }
 }
 

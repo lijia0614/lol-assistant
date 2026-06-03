@@ -30,6 +30,24 @@ export interface TopChampion {
   masteryPoints: number
 }
 
+/** 单场对局记录 */
+export interface RecentMatch {
+  matchId: string
+  timestamp: number       // Unix ms
+  duration: number        // 游戏时长秒
+  win: boolean
+  championId: number
+  championName: string
+  kills: number
+  deaths: number
+  assists: number
+  cs: number              // 补兵
+  csPerMinute: number
+  gameMode: string        // '排位赛' | '匹配赛' | '大乱斗'
+  lane: string            // '上单' | '打野' | '中单' | 'ADC' | '辅助'
+  kp: number              // 参团率 0-100
+}
+
 /** 单个玩家完整数据 */
 export interface PlayerData {
   puuid: string
@@ -41,6 +59,7 @@ export interface PlayerData {
   rank: RankInfo | null
   recentStats: RecentStats | null
   topChampions: TopChampion[]
+  recentMatches: RecentMatch[]  // 最近 5 场对局
 }
 
 /** 游戏会话 */

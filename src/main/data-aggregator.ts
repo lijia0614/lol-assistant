@@ -91,6 +91,7 @@ export class DataAggregator extends EventEmitter {
           championName: lp.championId ? championNames[String(lp.championId)] ?? null : null,
           rank: enriched.rank,
           recentStats: enriched.recentStats,
+          recentMatches: [], // Riot API 未在 v1 拉取单场记录
           topChampions: enriched.topChampions.map(c => ({
             ...c,
             championName: championNames[String(c.championId)] ?? `英雄${c.championId}`

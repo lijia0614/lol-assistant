@@ -2,6 +2,7 @@ export type {
   GamePhase,
   RankInfo,
   RecentStats,
+  RecentMatch,
   TopChampion,
   PlayerData,
   GameSession,

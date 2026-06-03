@@ -1,6 +1,7 @@
 import type { PlayerData } from '../types'
 import RankBadge from './RankBadge'
 import ChampionIcon from './ChampionIcon'
+import MatchHistory from './MatchHistory'
 
 interface DetailPanelProps {
   player: PlayerData
@@ -14,18 +15,19 @@ export default function DetailPanel({ player, onClose }: DetailPanelProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-12"
       style={{ background: 'rgba(0, 0, 0, 0.55)' }}
       onClick={onClose}
     >
       <div
-        className={`overlay-panel w-80 p-5 border-l-2 ${teamBorder}`}
+        className="overlay-panel w-[420px] max-h-[85vh] overflow-y-auto p-5 border-l-2"
+        style={{ borderLeftColor: player.team === 'blue' ? '#4da6ff' : '#ff4d4d' }}
         onClick={e => e.stopPropagation()}
       >
         {/* 头部：头像 + 名称 */}
         <div className="flex items-start gap-3 mb-4">
           <ChampionIcon
-            championId={player.championId ?? 0}
+            championId={player.championId}
             championName={player.championName}
             size={48}
           />
@@ -51,7 +53,7 @@ export default function DetailPanel({ player, onClose }: DetailPanelProps) {
           </button>
         </div>
 
-        {/* KDA & 胜率 */}
+        {/* KDA & 胜率概览 */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
             <div className="text-2xs text-gray-600 mb-1">KDA</div>
@@ -79,7 +81,7 @@ export default function DetailPanel({ player, onClose }: DetailPanelProps) {
         </div>
 
         {/* 常用英雄 */}
-        <div>
+        <div className="mb-4">
           <div className="text-2xs text-gray-600 mb-2">常用英雄 TOP 3</div>
           {player.topChampions.length === 0 ? (
             <p className="text-xs text-gray-600 italic">暂无数据（需配置 Riot API Key）</p>
@@ -102,6 +104,19 @@ export default function DetailPanel({ player, onClose }: DetailPanelProps) {
               ))}
             </div>
           )}
+        </div>
+
+        {/* 最近 5 场对局 */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xs text-gray-600">最近 5 场对局</div>
+            <div className="flex gap-3 text-2xs text-gray-700">
+              <span>KDA</span>
+              <span>CS</span>
+              <span>结果</span>
+            </div>
+          </div>
+          <MatchHistory matches={player.recentMatches ?? []} />
         </div>
       </div>
     </div>
