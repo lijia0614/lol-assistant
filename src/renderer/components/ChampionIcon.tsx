@@ -25,10 +25,10 @@ interface ChampionIconProps {
 
 export default function ChampionIcon({ championId, championName, size = 32, className = '' }: ChampionIconProps) {
   const [error, setError] = useState(false)
-  const [version, setVersion] = useState(cachedVersion)
+  const [versionReady, setVersionReady] = useState(!!cachedVersion)
 
   useEffect(() => {
-    ensureVersion().then(() => setVersion(cachedVersion))
+    ensureVersion().then(() => setVersionReady(true))
   }, [])
 
   // 无效 championId → 直接显示占位
@@ -36,8 +36,13 @@ export default function ChampionIcon({ championId, championName, size = 32, clas
     return <FallbackAvatar name={championName} size={size} className={className} />
   }
 
+  // 版本号还在加载中 → 显示占位，避免空 src 触发 onError
+  if (!versionReady) {
+    return <FallbackAvatar name={championName} size={size} className={className} />
+  }
+
   const key = getChampionKey(championId)
-  const src = version ? `${CDN_BASE}/${version}/img/champion/${key}.png` : ''
+  const src = `${CDN_BASE}/${cachedVersion}/img/champion/${key}.png`
 
   return (
     <img
@@ -49,7 +54,6 @@ export default function ChampionIcon({ championId, championName, size = 32, clas
       className={`rounded-full flex-shrink-0 bg-white/[0.03] border border-white/[0.06] ${className}`}
       onError={() => setError(true)}
       loading="lazy"
-      crossOrigin="anonymous"
     />
   )
 }
