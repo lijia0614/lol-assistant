@@ -1,21 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const CDN_BASE = 'https://ddragon.leagueoflegends.com/cdn'
+let cachedVersion = ''
 
-// 常用英雄版本号（应用启动时更新，这里用最新稳定版）
-let cachedVersion = '14.10.1'
-
-/** 初始化 Data Dragon 版本号 */
-export async function initChampionVersion(): Promise<void> {
-  try {
-    const resp = await fetch('https://ddragon.leagueoflegends.com/api/versions.json')
-    const versions: string[] = await resp.json()
-    cachedVersion = versions[0]
-  } catch { /* use cached version */ }
+/** 初始化 Data Dragon 版本号（首次调用时 fetch） */
+let versionPromise: Promise<void> | null = null
+function ensureVersion(): Promise<void> {
+  if (cachedVersion) return Promise.resolve()
+  if (!versionPromise) {
+    versionPromise = fetch('https://ddragon.leagueoflegends.com/api/versions.json')
+      .then(r => r.json())
+      .then((versions: string[]) => { cachedVersion = versions[0] })
+      .catch(() => { cachedVersion = '16.11.1' }) // fallback
+  }
+  return versionPromise
 }
 
 interface ChampionIconProps {
-  championId: number
+  championId: number | null
   championName?: string | null
   size?: number
   className?: string
@@ -23,21 +25,19 @@ interface ChampionIconProps {
 
 export default function ChampionIcon({ championId, championName, size = 32, className = '' }: ChampionIconProps) {
   const [error, setError] = useState(false)
-  const src = `${CDN_BASE}/${cachedVersion}/img/champion/${getChampionKey(championId)}.png`
+  const [version, setVersion] = useState(cachedVersion)
 
-  if (error) {
-    return (
-      <div
-        className={`rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center flex-shrink-0 ${className}`}
-        style={{ width: size, height: size }}
-        title={championName ?? `英雄${championId}`}
-      >
-        <span className="text-2xs text-gray-600" style={{ fontSize: size * 0.32 }}>
-          {championName?.charAt(0) ?? '?'}
-        </span>
-      </div>
-    )
+  useEffect(() => {
+    ensureVersion().then(() => setVersion(cachedVersion))
+  }, [])
+
+  // 无效 championId → 直接显示占位
+  if (!championId || championId <= 0 || error) {
+    return <FallbackAvatar name={championName} size={size} className={className} />
   }
+
+  const key = getChampionKey(championId)
+  const src = version ? `${CDN_BASE}/${version}/img/champion/${key}.png` : ''
 
   return (
     <img
@@ -49,7 +49,32 @@ export default function ChampionIcon({ championId, championName, size = 32, clas
       className={`rounded-full flex-shrink-0 bg-white/[0.03] border border-white/[0.06] ${className}`}
       onError={() => setError(true)}
       loading="lazy"
+      crossOrigin="anonymous"
     />
+  )
+}
+
+function FallbackAvatar({ name, size, className }: { name?: string | null; size: number; className: string }) {
+  const letter = name?.charAt(0) ?? '?'
+  const colors = ['#4da6ff', '#ff4d4d', '#f0c040', '#4ade80', '#a855f7', '#f472b6']
+  const color = colors[letter.charCodeAt(0) % colors.length]
+
+  return (
+    <div
+      className={`rounded-full flex items-center justify-center flex-shrink-0 ${className}`}
+      style={{
+        width: size,
+        height: size,
+        background: `rgba(255,255,255,0.04)`,
+        border: `1px solid ${color}40`,
+        color,
+        fontSize: size * 0.38,
+        fontWeight: 600,
+      }}
+      title={name ?? '未知英雄'}
+    >
+      {letter}
+    </div>
   )
 }
 
@@ -58,7 +83,7 @@ function getChampionKey(id: number): string {
   return CHAMPION_KEY_MAP[id] ?? String(id)
 }
 
-/** 硬编码 championId → champion key 映射（全量 170+ 英雄） */
+/** 硬编码 championId → champion key 映射（全量 173 英雄） */
 const CHAMPION_KEY_MAP: Record<number, string> = {
   1: 'Annie', 2: 'Olaf', 3: 'Galio', 4: 'TwistedFate',
   5: 'XinZhao', 6: 'Urgot', 7: 'Leblanc', 8: 'Vladimir',
